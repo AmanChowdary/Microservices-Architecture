@@ -1,0 +1,30 @@
+replicaCount: 2
+
+mongodb:
+  image: mongo:6.0
+  username: root
+  password: password
+
+userService:
+  image: user-service:latest
+  port: 3000
+
+productService:
+  image: product-service:latest
+  port: 3001
+
+orderService:
+  image: order-service:latest
+  port: 3002
+
+prometheus:
+  image: prom/prometheus:latest
+  port: 9090
+
+grafana:
+  image: grafana/grafana:latest
+  port: 3000
+
+ingress:
+  enabled: true
+  host: microservices.local 

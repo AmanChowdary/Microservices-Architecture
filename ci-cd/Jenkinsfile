@@ -1,0 +1,36 @@
+pipeline {
+  agent any
+  environment {
+    REGISTRY = "your-dockerhub-username"
+  }
+  stages {
+    stage('Build') {
+      steps {
+        script {
+          def services = ['user-service', 'product-service', 'order-service']
+          for (svc in services) {
+            dir(svc) {
+              sh 'docker build -t $REGISTRY/${svc}:latest .'
+            }
+          }
+        }
+      }
+    }
+    stage('Push') {
+      steps {
+        script {
+          def services = ['user-service', 'product-service', 'order-service']
+          for (svc in services) {
+            sh 'docker push $REGISTRY/${svc}:latest'
+          }
+        }
+      }
+    }
+    stage('Deploy to Kubernetes') {
+      steps {
+        sh 'kubectl apply -f k8s/'
+        sh 'kubectl apply -f monitoring/'
+      }
+    }
+  }
+} 

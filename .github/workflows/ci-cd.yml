@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-push-deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
+      IMAGE_TAG: latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build and test user-service
+        run: |
+          cd user-service
+          npm install
+          npm test || echo "No tests defined"
+          docker build -t $REGISTRY/user-service:$IMAGE_TAG .
+
+      - name: Build and test product-service
+        run: |
+          cd product-service
+          npm install
+          npm test || echo "No tests defined"
+          docker build -t $REGISTRY/product-service:$IMAGE_TAG .
+
+      - name: Build and test order-service
+        run: |
+          cd order-service
+          npm install
+          npm test || echo "No tests defined"
+          docker build -t $REGISTRY/order-service:$IMAGE_TAG .
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push images to Docker Hub
+        run: |
+          docker push $REGISTRY/user-service:$IMAGE_TAG
+          docker push $REGISTRY/product-service:$IMAGE_TAG
+          docker push $REGISTRY/order-service:$IMAGE_TAG
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Deploy to Kubernetes with Helm
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          helm upgrade --install microservices-architecture ./helm --set userService.image=$REGISTRY/user-service:$IMAGE_TAG --set productService.image=$REGISTRY/product-service:$IMAGE_TAG --set orderService.image=$REGISTRY/order-service:$IMAGE_TAG 

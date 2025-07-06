@@ -1,0 +1,4 @@
+apiVersion: v2
+name: microservices-architecture
+version: 0.1.0
+description: A Helm chart for deploying a professional microservices architecture with MongoDB, Ingress, and monitoring 
