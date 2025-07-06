@@ -133,5 +133,3 @@ helm upgrade --install microservices-architecture ./helm
 - Integrate with databases or external APIs as needed
 - Enhance security with RBAC, network policies, and TLS
 
-## License
-MIT 
