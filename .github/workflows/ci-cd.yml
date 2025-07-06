@@ -10,7 +10,6 @@ jobs:
   build-test-push-deploy:
     runs-on: ubuntu-latest
     env:
-      REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
       IMAGE_TAG: latest
     steps:
       - name: Checkout code
@@ -26,33 +25,34 @@ jobs:
           cd user-service
           npm install
           npm test || echo "No tests defined"
-          docker build -t $REGISTRY/user-service:$IMAGE_TAG .
+          docker build -t user-service:$IMAGE_TAG .
 
       - name: Build and test product-service
         run: |
           cd product-service
           npm install
           npm test || echo "No tests defined"
-          docker build -t $REGISTRY/product-service:$IMAGE_TAG .
+          docker build -t product-service:$IMAGE_TAG .
 
       - name: Build and test order-service
         run: |
           cd order-service
           npm install
           npm test || echo "No tests defined"
-          docker build -t $REGISTRY/order-service:$IMAGE_TAG .
+          docker build -t order-service:$IMAGE_TAG .
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # The following steps are commented out for local-only builds
+      # - name: Log in to Docker Hub
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push images to Docker Hub
-        run: |
-          docker push $REGISTRY/user-service:$IMAGE_TAG
-          docker push $REGISTRY/product-service:$IMAGE_TAG
-          docker push $REGISTRY/order-service:$IMAGE_TAG
+      # - name: Push images to Docker Hub
+      #   run: |
+      #     docker push user-service:$IMAGE_TAG
+      #     docker push product-service:$IMAGE_TAG
+      #     docker push order-service:$IMAGE_TAG
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -68,4 +68,5 @@ jobs:
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
-          helm upgrade --install microservices-architecture ./helm --set userService.image=$REGISTRY/user-service:$IMAGE_TAG --set productService.image=$REGISTRY/product-service:$IMAGE_TAG --set orderService.image=$REGISTRY/order-service:$IMAGE_TAG 
+          helm upgrade --install microservices-architecture ./helm --set userService.image=user-service:$IMAGE_TAG --set productService.image=product-service:$IMAGE_TAG --set orderService.image=order-service:$IMAGE_TAG
+          
