@@ -64,9 +64,9 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Deploy to Kubernetes with Helm
-        env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
-        run: |
-          helm upgrade --install microservices-architecture ./helm --set userService.image=user-service:$IMAGE_TAG --set productService.image=product-service:$IMAGE_TAG --set orderService.image=order-service:$IMAGE_TAG
+      # - name: Deploy to Kubernetes with Helm
+      #   env:
+      #     KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      #   run: |
+      #     helm upgrade --install microservices-architecture ./helm --set userService.image=user-service:$IMAGE_TAG --set productService.image=product-service:$IMAGE_TAG --set orderService.image=order-service:$IMAGE_TAG
           
